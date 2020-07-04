@@ -42,6 +42,72 @@ function createRecentSearchBtn(q) {
 //Function to get weather details 
 function getWeather(q) {
     var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + q + "&units=imperial&appid=" + APIKey;
+    
+    //A couple of different ways to handle your errors in ajax:
+    //Notice the (err) function on line 55
+    $.ajax({
+            url: queryURL,
+            method: "GET",
+
+        })
+        .then((response) => {
+            console.log(response);
+        }, (err) => {
+            alert("Must be a valid city name");
+            if (err) {
+                $("#city-input").val('');
+            }
+        });
+    
+    //OR you can use the success/error function that we discussed last night:
+    $.ajax({
+        url: queryURL,
+        method: "GET",
+        success: function(response) {
+
+            if (response.message === "city not found") {
+                return alert("Invalid City");
+            }
+            console.log("response.name: " + response.name);
+            if (response.name == '') {
+                return alert("Enter a name");
+
+            }
+            //to avoid repeating city information on button click 
+            $(".cityList").empty();
+            $("#days").empty();
+
+            console.log(response.name);
+
+            var cityMain = $("<div col-12>").append($("<h1>" + response.name + "</h1>"));
+            var image = $('<img class="imgsize">').attr('src', 'http://openweathermap.org/img/w/' + response.weather[0].icon + '.png');
+            var degreeMain = $('<p>').text('Temperature : ' + response.main.temp + ' °F ');
+            var humidityMain = $('<p>').text('Humidity : ' + response.main.humidity + '%');
+            var windMain = $('<p>').text('Wind Speed : ' + response.wind.speed + 'MPH');
+            var iconMain = $('<p>').attr('src', 'https://openweathermap.org/img/wn/' + response.weather[0].icon + '@2x.png');
+            var uvIndexcoord = '&lat=' + response.coord.lat + '&lon=' + response.coord.lon;
+            var cityId = response.id;
+
+            //  displayUVindex(uvIndexcoord);
+            // displayForecast(cityId);
+
+            cityMain.append(image).append(degreeMain).append(humidityMain).append(windMain).append(iconMain);
+            $('#cityList').empty();
+            $('#cityList').append(cityMain);
+        },
+
+        error: function(one, two, error) {
+            if (error) {
+                return alert("Must enter valid city");
+            }
+            console.log("one: " + one);
+            console.log("two: " + two);
+            console.log("error: " + error);
+            console.log("ERRor!!");
+        }
+    })
+    //********
+    
     $.ajax({
         // gets the current weather info
         url: queryURL,
